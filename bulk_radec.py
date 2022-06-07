@@ -2,6 +2,7 @@ import os
 from astropy.io import ascii
 from astropy.table import Table, Column 
 import requests
+import json
 
 sourcenames = ascii.read('lrn-ilrt-ZTFI.csv')
 

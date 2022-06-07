@@ -18,7 +18,7 @@ from datetime import datetime
 from astropy.coordinates import Distance
 from astropy.io import ascii
 from penquins import Kowalski
-
+import json
 # In[2]:
 
 

@@ -13,7 +13,7 @@ config['data_dir'] = '/home/viraj/dustmaps'
 from dustmaps.sfd import SFDQuery
 from astropy.coordinates import SkyCoord
 import astropy.units as u
-
+import json
 
 # In[2]:
 
