@@ -330,7 +330,8 @@ def get_finder(ra, dec, name, rad, debug=False, starlist=None, print_starlist=Tr
     if image_file is None or image is None:
         print ("FATAL ERROR! Your FITS image could not be retrieved.")
         return
-        
+    
+    if debug: print(image[0].data)
 
     # Get pixel coordinates of SN, reference stars in DSS image
     wcs = astropy.wcs.WCS(image[0].header)
@@ -360,7 +361,7 @@ def get_finder(ra, dec, name, rad, debug=False, starlist=None, print_starlist=Tr
     plt.plot([target_pix[0,0]+15,(target_pix[0,0]+10)],[target_pix[0,1],(target_pix[0,1])], 'g-', lw=2)
     plt.plot([target_pix[0,0],(target_pix[0,0])],[target_pix[0,1]+10,(target_pix[0,1])+15], 'g-', lw=2)
     plt.annotate(name, xy=(target_pix[0,0], target_pix[0,1]),  xycoords='data',xytext=(22,-3), textcoords='offset points')
-    
+
     # Mark and label reference stars
     if (len(catalog)>0):
         plt.plot([ref1_pix[0,0]+15,(ref1_pix[0,0]+10)],[ref1_pix[0,1],(ref1_pix[0,1])], 'b-', lw=2)
@@ -371,11 +372,12 @@ def get_finder(ra, dec, name, rad, debug=False, starlist=None, print_starlist=Tr
         plt.plot([ref2_pix[0,0],(ref2_pix[0,0])],[ref2_pix[0,1]+10,(ref2_pix[0,1])+15], 'r-', lw=2)
         plt.annotate("R2", xy=(ref2_pix[0,0], ref2_pix[0,1]),  xycoords='data',xytext=(22,-3), textcoords='offset points', color="r")
 
-        
-    # Set limits to size of DSS image
-    pylab.xlim([0,(image[0].data.shape[0])])
-    pylab.ylim([0,(image[0].data.shape[1])])
     
+    
+    # Set limits to size of DSS image
+    plt.xlim(0,image[0].data.shape[0])
+    plt.ylim(0,image[0].data.shape[1])
+
     # Plot compass
     plt.plot([(image[0].data.shape[0])-10,(image[0].data.shape[0]-40)],[10,10], 'k-', lw=2)
     plt.plot([(image[0].data.shape[0])-10,(image[0].data.shape[0])-10],[10,40], 'k-', lw=2)
@@ -383,51 +385,54 @@ def get_finder(ra, dec, name, rad, debug=False, starlist=None, print_starlist=Tr
     plt.annotate("E", xy=((image[0].data.shape[0])-40, 20),  xycoords='data',xytext=(-12,-5), textcoords='offset points')
     
     # Set axis tics (not implemented correctly yet)
-    plt.tick_params(labelbottom='off')
-    plt.tick_params(labelleft='off')
-    plt.axes().xaxis.set_major_locator(MaxNLocator(5))
-    plt.axes().yaxis.set_major_locator(MaxNLocator(5))
-    plt.axes().set_xlabel('%.1f\''%(rad*60))
-    plt.axes().set_ylabel('%.1f\''%(rad*60))
+    #plt.tick_params(labelbottom='off')
+    #plt.tick_params(labelleft='off')
+    #plt.axes().xaxis.set_major_locator(MaxNLocator(5))
+    #plt.axes().yaxis.set_major_locator(MaxNLocator(5))
+    #plt.axes().set_xlabel('%.1f\''%(rad*60))
+    #plt.axes().set_ylabel('%.1f\''%(rad*60))
     
     # Set size of window (leaving space to right for ref star coords)
     plt.subplots_adjust(right=0.65,left=0.05, top=0.99, bottom=0.05)
     
+
     #If no magnitude was supplied, just do not put it on the chart.
     if not np.isnan(mag):
         target_mag = "mag=%.2f"%mag
     else:
         target_mag = ""
-        
+    
+
+    
     # List name, coords, mag of references etc
-    plt.text(1.02, 0.85, name, transform=plt.axes().transAxes, fontweight='bold')
-    plt.text(1.02, 0.80, "%s"%target_mag, transform=plt.axes().transAxes, fontweight='bold')
-    plt.text(1.02, 0.75, "%.5f %.5f"%(ra, dec),transform=plt.axes().transAxes)
-    rah, dech = deg2hour(ra, dec)
-    plt.text(1.02, 0.7,rah+"  "+dech, transform=plt.axes().transAxes)
+    #plt.text(1.02, 0.85, name, transform=plt.axes().transAxes, fontweight='bold')
+    #plt.text(1.02, 0.80, "%s"%target_mag, transform=plt.axes().transAxes, fontweight='bold')
+    #plt.text(1.02, 0.75, "%.5f %.5f"%(ra, dec),transform=plt.axes().transAxes)
+    #rah, dech = deg2hour(ra, dec)
+    #plt.text(1.02, 0.7,rah+"  "+dech, transform=plt.axes().transAxes)
     
     #Put the text for the offset stars.
     if (len(catalog)>0):
         ofR1 = get_offset(catalog["ra"][0], catalog["dec"][0], ra, dec)
         S1 = deg2hour(catalog["ra"][0], catalog["dec"][0], sep=":")
 
-        plt.text(1.02, 0.60,'R1, mag=%.2f'%catalog["mag"][0], transform=plt.axes().transAxes, color="b")
-        plt.text(1.02, 0.55,'%s %s'%(S1[0], S1[1]), transform=plt.axes().transAxes, color="b")
-        plt.text(1.02, 0.5,"E: %.2f N: %.2f"%(ofR1[0], ofR1[1]),transform=plt.axes().transAxes, color="b")
+        #plt.text(1.02, 0.60,'R1, mag=%.2f'%catalog["mag"][0], transform=plt.axes().transAxes, color="b")
+        #plt.text(1.02, 0.55,'%s %s'%(S1[0], S1[1]), transform=plt.axes().transAxes, color="b")
+        #plt.text(1.02, 0.5,"E: %.2f N: %.2f"%(ofR1[0], ofR1[1]),transform=plt.axes().transAxes, color="b")
 
     if (len(catalog)>1):
         ofR2 = get_offset(catalog["ra"][1], catalog["dec"][1], ra, dec)
         S2 = deg2hour(catalog["ra"][1], catalog["dec"][1], sep=":")
 
-        plt.text(1.02, 0.4,'R2, mag=%.2f'%catalog["mag"][1], transform=plt.axes().transAxes, color="r")
-        plt.text(1.02, 0.35,'%s %s'%(S2[0], S2[1]), transform=plt.axes().transAxes, color="r")
-        plt.text(1.02, 0.3,"E: %.2f N: %.2f"%(ofR2[0], ofR2[1]),transform=plt.axes().transAxes, color="r")
+    #    plt.text(1.02, 0.4,'R2, mag=%.2f'%catalog["mag"][1], transform=plt.axes().transAxes, color="r")
+    #    plt.text(1.02, 0.35,'%s %s'%(S2[0], S2[1]), transform=plt.axes().transAxes, color="r")
+    #    plt.text(1.02, 0.3,"E: %.2f N: %.2f"%(ofR2[0], ofR2[1]),transform=plt.axes().transAxes, color="r")
     
-
+    if debug: plt.show()
     # Save to pdf
-    pylab.savefig(os.path.join(directory, str(name+'_finder.pdf')))
+    plt.savefig(os.path.join(directory, str(name+'_finder.pdf')))
     if debug: print ("Saved to %s"%os.path.join(directory, str(name+'_finder.pdf')))
-    pylab.close("all")
+    plt.close()
     
     #Print starlist
     if telescope == "Keck":
