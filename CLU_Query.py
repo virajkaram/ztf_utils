@@ -19,14 +19,17 @@ from scipy import interpolate
 from scipy.interpolate import interp1d
 from astroquery.irsa_dust import IrsaDust
 import astropy.coordinates as coord
+import json
 
 import astropy.units as u
 from scipy.optimize import curve_fit
 
 
 # Username & Password Credentials
-user = "viraj"
-passw = "vr@j6722015"
+with open('/Users/viraj/ztf_utils/secrets_marshal.json','r') as f:
+    dat = json.load(f)
+user = dat['user']
+passw = dat['pwd']
 
 # What are the parameters we want to download from the GROWTH Marshal?
 # ZTF_id, classification, number_of_spectra, {date_saved_iso}, z, ra, dec, peak_mag(red) or green when fail, d_CLU_galaxy, peak_abs_mag
