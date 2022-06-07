@@ -10,14 +10,14 @@ from finder_chart import get_finder
 def make_palomar_targetlist(input_filename,name_colname='Toi_id',ra_colname='RA',dec_colname='Dec',comment_colname='Priority',finder=False,finder_dir='finder_charts'):
     #palomar targetlist format
 
+    file2 = Table.read(input_filename,format='csv')
     if finder:
         for i in range(len(file2)):
             coo = SkyCoord(ra=file2[i][ra_colname],dec=file2[i][dec_colname],unit=(u.deg,u.deg))
             name = str(file2[i][name_colname])
             get_finder(ra=coo.ra.deg, dec = coo.dec.deg, name=name, rad = 0.02, starlist=starlistname, directory=finder_dir, telescope="P200", minmag=7, maxmag=17)
 
-    else:
-        file2 = Table.read(input_filename,format='csv')
+    else:        
         starlistname = input_filename.split('.')[0]+'_palomar.dat'
         with open(starlistname,'w') as f:
 
