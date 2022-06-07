@@ -7,6 +7,9 @@ import requests
 
 #groupids  41:rcf, 43:clu
 def api(method, endpoint, data=None):
+    with open('/Users/viraj/ztf_utils/secrets_fritz_token.json','r') as f:
+        dat = json.load(f)
+    token = dat['token']
     headers = {'Authorization': f'token {token}'}
     response = requests.request(method, endpoint, params=data, headers=headers)
     return response.json()
