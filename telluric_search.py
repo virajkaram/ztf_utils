@@ -45,9 +45,18 @@ def query_gemini_website(ra_hms, dec_dms, min_dist_deg=15, name='Science star', 
 if __name__ =='__main__':
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("input_filename", type=str, help='Input targetlist in Keck/P200 format')
+    parser.add_argument("telescope", type=str, help='Either Keck or P200')
 
     args = parser.parse_args()
     inp_filename = args.input_filename
+
+    if args.telescope == 'Keck':
+        comment_char = '#'
+    elif args.telescope == 'P200':
+        comment_char = '!'
+    else:
+        print('Only Keck/P200 formats are supported.')
+        exit(1)
 
     with open(inp_filename, 'r') as f:
         dat = f.readlines()
@@ -56,7 +65,7 @@ if __name__ =='__main__':
     for row in dat:
         if np.logical_or('_o' in row, 'HIP' in row):
             continue
-        sci_targets.append(row)
+        sci_targets.append(row.split(comment_char,1)[0])
 
     sci_targets_table = ascii.read(sci_targets)
     for row in sci_targets_table:
@@ -75,5 +84,7 @@ if __name__ =='__main__':
             dec_format = tell_star['DEC(J2000)'].replace(':', ' ')
             comments = f"source_name = {name} Vmag={tell_star['Vmag']} dist={tell_star['Dist(deg)']}"
             with open(inp_filename,'a') as f:
-
-                f.write(f"\n{hip_name.ljust(15)} {ra_format} {dec_format}0 2000.0  # {comments}")
+                if args.telescope == 'Keck':
+                    f.write(f"\n{hip_name.ljust(15)} {ra_format} {dec_format}0 2000.0  {comment_char} {comments}")
+                if args.telescope == 'P200':
+                    f.write(f"\n{hip_name.ljust(19)} {ra_format}  {dec_format}0  2000.0  {comment_char} {comments}")
