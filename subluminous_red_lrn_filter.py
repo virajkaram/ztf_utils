@@ -46,7 +46,7 @@ def gen_collc_interp(photometry,flux=False,filt1='g',filt2='r'):
     gdetds = np.array(gds[(gpoints[:,1] != None)],dtype=float)
     
     if (len(gpoints)==0)|(len(rdetds)==0):
-        return (np.array([np.nan]),np.array([np.nan]),np.array([np.nan]),np.array([True]),np.array([True]),np.array([0]),np.array([0]))
+        return (np.array([np.nan]),np.array([np.nan]),np.array([np.nan]),np.array([True]),np.array([True]),np.array([0]),np.array([0])), np.array([0])
     if len(rdetds)>=len(gdetds):
         interpolate_points = rpoints
         fix_points = gpoints
@@ -89,10 +89,10 @@ def gen_collc_interp(photometry,flux=False,filt1='g',filt2='r'):
     interpolate_collims = interp_limmask&dtmask
     
     if len(rdetds)>=len(gdetds):
-        return (fix_ds,cols,colerrs,fix_collims,interpolate_collims,interpolate_detds,interpolate_detmags)
+        return (fix_ds,cols,colerrs,fix_collims,interpolate_collims,interpolate_detds,interpolate_detmags,interps)
     
     else:
-        return (fix_ds,-1*cols,colerrs,interpolate_collims,fix_collims,interpolate_detds,interpolate_detmags)
+        return (fix_ds,-1*cols,colerrs,interpolate_collims,fix_collims,interpolate_detds,interpolate_detmags,interps)
 
 
 def is_subluminous(photometry,dm=None,flux=False):
@@ -340,6 +340,7 @@ if __name__ == '__main__':
         sources = query_fritz(prog_id,start_date,end_date,args.arx)
         total_sources = total_sources + len(sources)
 
+        print(total_sources)
         if len(sources) == 0:
             continue
 
