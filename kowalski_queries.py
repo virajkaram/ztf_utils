@@ -63,6 +63,9 @@ def cone_search_CLU(k, coords, radius=20):
                     "filter": {},
                     "projection": {
                         "_id": 0,
+                        "cutoutScience":0,
+                        "cutoutTemplate":0,
+                        "cutoutDifference":0
                         
                     }
                 }
@@ -115,15 +118,19 @@ if __name__ =='__main__':
     parser.add_argument("--dec",type=float,help="dec")
     parser.add_argument("--radius",type=float,default=20,help="radius")
     parser.add_argument("--clu",action="store_true")
+    parser.add_argument("--full",action="store_true")
 
     args = parser.parse_args()
 
     k = connect_kowalski()
     coords = {args.name:[args.ra,args.dec]}
     data = cone_search(k,coords,args.radius)
+
     if len(data['ZTF_alerts'][args.name])>0:
         for i in data['ZTF_alerts'][args.name]:
             print(i['objectId'])
+            if args.full:
+            	print(i['candidate'])
 
     else:
         print(data)
