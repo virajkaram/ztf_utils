@@ -8,9 +8,13 @@ import numpy as np
 from astropy.io import ascii, fits
 from astropy.table import Table
 from astropy.time import Time
+import json
 
 # Copy the API token from your Fritz account
-token = '18162129-49f8-4b85-9e0e-38f18fac32c1'
+with open('secrets_fritz_token.json','r') as f:
+    dat = json.load(f)
+
+token = dat['token']
 
 """
 Default observers and reducers (these are NOT necessary to be set,
