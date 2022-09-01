@@ -46,7 +46,7 @@ def init():
 init()
 
 
-def plot_fluxes(d,c='red',l='ZTF-g',ymn=-50,ymx=200,magticks=True):
+def plot_fluxes(d,c='red',l='ZTF-g',ymn=-200,ymx=200,magticks=True):
     jd0 = Time(datetime.utcnow()).jd
     ax1.plot(d['jd,']-jd0,np.array(d['forcediffimflux_uJy'],dtype=float),'.',color=c)
     ax1.errorbar(d['jd,']-jd0,np.array(d['forcediffimflux_uJy'],dtype=float),yerr=np.array(d['forcediffimfluxunc_uJy'],dtype=float),fmt='.',color=c,label=l)#,t['col26']
@@ -244,6 +244,8 @@ if args.ztf_file is not None:
         np.array(ztflc['forcediffimflux,'],dtype=float)
     except ValueError:
         ztflc = ztflc[ztflc['forcediffimflux,']!='null']
+
+    ztflc = ztflc[(ztflc['infobitssci,']==0) & (ztflc['scisigpix,']<25) & (ztflc['sciinpseeing,']<4)]
     print('Found %s good points.'%(len(ztflc)))
 
     ztflc.add_column(Column(name = 'forcediffimflux_uJy',data=np.array(ztflc['forcediffimflux,'],dtype=float)*10**(-0.4*(np.array(ztflc['zpmaginpsci,'])+48.6))/1e-29))
@@ -267,7 +269,7 @@ if args.ztf_file is not None:
             plt.xlabel('JD - %i [today]'%(jd0))
             plt.ylabel('mag')
             if args.xlim is not None:
-                plt.xlim(args.xlim,4)
+                plt.xlim(args.xlim,1)
 
             if args.atlas_file is not None:
                 print('In Atlas')
@@ -287,7 +289,7 @@ if args.ztf_file is not None:
             plt.xlabel('JD - %i [today]'%(jd0))
             plt.ylabel('mag')
             if args.xlim is not None:
-                plt.xlim(args.xlim,4)
+                plt.xlim(args.xlim,1)
 
             if args.atlas_file is not None:
                 print('In Atlas bin')
@@ -304,6 +306,7 @@ if args.ztf_file is not None:
                 plt = plot_binned_mags_df(c,args.cbin,c='cyan',l='ATLAS-c',magticks=True,ymn=args.ymin,ymx=args.ymax,jd0=jd0)
                 plt = plot_binned_mags_df(o,args.obin,c='orange',l='ATLAS-o',magticks=True,ymn=args.ymin,ymx=args.ymax,jd0=jd0)
 
+            plt.legend()
             plt.savefig('%s_binned_mags.pdf'%(objname),bbox_inches='tight')
 
 
@@ -364,7 +367,7 @@ if args.atlas_file is not None:
         plt.savefig('%s_binned_mags.pdf'%(objname),bbox_inches='tight')
 
 if args.xlim is not None:
-    plt.xlim(args.xlim,4)
+    plt.xlim(args.xlim,1)
 
 
 plt.savefig('%s.pdf'%(objname),bbox_inches='tight')
