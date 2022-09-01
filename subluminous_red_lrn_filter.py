@@ -46,7 +46,7 @@ def gen_collc_interp(photometry,flux=False,filt1='g',filt2='r'):
     gdetds = np.array(gds[(gpoints[:,1] != None)],dtype=float)
     
     if (len(gpoints)==0)|(len(rdetds)==0):
-        return (np.array([np.nan]),np.array([np.nan]),np.array([np.nan]),np.array([True]),np.array([True]),np.array([0]),np.array([0])), np.array([0])
+        return np.array([np.nan]),np.array([np.nan]),np.array([np.nan]),np.array([True]),np.array([True]),np.array([0]),np.array([0]), np.array([0])
     if len(rdetds)>=len(gdetds):
         interpolate_points = rpoints
         fix_points = gpoints
@@ -115,7 +115,7 @@ def lrn_filter(photometry,fore_gmr,dm=None,flux=False):
     bluepeak = False
     
     subluminous,maxday,peakabsmag = is_subluminous(photometry,dm,flux=flux)
-    d,c,cerr,gl,rl,dds,dmags = gen_collc_interp(photometry,flux=flux)
+    d,c,cerr,gl,rl,dds,dmags, interps = gen_collc_interp(photometry,flux=flux)
     c = c - fore_gmr
     #maxday = dds[np.argmin(dmags)]
     if np.all(np.isnan(c)):
@@ -382,7 +382,12 @@ if __name__ == '__main__':
 
         for k in range(len(sources)):
             source = sources[k]
-            photometry = source['photometry']
+            try:
+                photometry = source['photometry']
+            except KeyError:
+                response = api('GET',f"https://fritz.science/api/sources/{source['id']}",data={'includePhotometry':True})
+                photometry = response.json()['data']['photometry']
+                source['photometry'] = photometry
             #fgmr = fore_gmr[k]
             if len(photometry)==0:
                 continue
