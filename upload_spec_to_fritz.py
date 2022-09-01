@@ -3,7 +3,7 @@ import pandas as pd
 import os
 from glob import glob
 import requests, json
-from astropy.io import ascii,fits
+from astropy.io import ascii, fits
 from astropy.time import Time
 from astropy.table import Table
 import matplotlib.pyplot as plt
@@ -23,29 +23,29 @@ def api(method, endpoint, data=None):
 
 
 def get_instrument_id(inst_name):
-    url = BASEURL+'api/instrument'
-    response = api('GET',url)
+    url = BASEURL + 'api/instrument'
+    response = api('GET', url)
     inst_list = np.array(response['data'])
     inst_id = inst_list[[inst_name in d['name'] for d in inst_list]][0]['id']
     return inst_id
 
 
-def get_user_id(firstname, lastname, loosematch = False):
-    url = BASEURL+'api/user'
-    response = api('GET',url)
-    user_list= response['data']['users']
+def get_user_id(firstname, lastname, loosematch=False):
+    url = BASEURL + 'api/user'
+    response = api('GET', url)
+    user_list = response['data']['users']
     user_info = []
     for d in user_list:
-        fn = 'NA' if(d['first_name'] is None) else d['first_name']
-        ln = 'NA' if(d['last_name'] is None) else d['last_name']
-        if(loosematch):
-            if(firstname in fn or lastname in ln):
+        fn = 'NA' if (d['first_name'] is None) else d['first_name']
+        ln = 'NA' if (d['last_name'] is None) else d['last_name']
+        if (loosematch):
+            if (firstname in fn or lastname in ln):
                 user_info.append(d)
         else:
-            if(firstname in fn and lastname in ln):
+            if (firstname in fn and lastname in ln):
                 user_info.append(d)
                 break
-    if(len(user_info)>1):
+    if (len(user_info) > 1):
         print('Following users found, choose array index of your user')
         print(user_info)
         inp = input('Array index? : ')
@@ -61,8 +61,8 @@ def get_source_api(ztfname):
         Returns : all basic data of that source (excludes photometry and spectra,
                   includes redshift, classification, comments, etc.)
     '''
-    url = BASEURL+'api/sources/'+ztfname
-    response = api('GET',url)
+    url = BASEURL + 'api/sources/' + ztfname
+    response = api('GET', url)
     return response['data']
 
 
@@ -96,10 +96,36 @@ def upload_spec(specfile, ztfname, obsdate, meta, instrument_id, observers, redu
         print(r)
 
 
+def prepare_spectrum_in_ascii_format(spec, instrument_id):
+    ascii_specname = ''
+    if instrument_id == 3:
+        name = os.path.basename(spec).split('_')[0]
+        hdr = fits.open(spec)[1].header
+        dat = fits.open(spec)[-1].data
+        tbl = Table(dat)
+        tbl = tbl[tbl['wave'] > 3500]
+        hdr = dict(hdr)
+        hdr.pop('COMMENT')
+        tbl.meta['comments'] = [key + ': ' + str(hdr[key]) for key in list(hdr.keys())] + [
+            '# Columns: WAVE FLUX FLUX_ERR']
+        ascii_specname = f'{args.d}/{name}_spec.txt'
+        ascii.write(tbl, ascii_specname, format='no_header', overwrite=True)
+        lines = np.array(tbl.meta['comments'])
+        date = lines[['UTSHUT' in line for line in lines]][0].split(': ')[1]
+
+    if instrument_id==7:
+        lines = open(spec, 'r').readlines()
+        date = Time(np.array(lines)[['MJD' in line for line in lines]][0].split()[3][1:-1], format='mjd').isot
+        ascii_specname = spec
+
+    return ascii_specname, date
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', type=str, help='Directory')
-    parser.add_argument('-obs_names', type=str, help='Comma separated list of observer names e.g Viraj Karambelkar, Nicholas Earley')
+    parser.add_argument('-obs_names', type=str,
+                        help='Comma separated list of observer names e.g Viraj Karambelkar, Nicholas Earley')
     parser.add_argument('-red_names', type=str, help='Comma separated list of reducer names e.g. Viraj Karambelkar')
     parser.add_argument('-inst', type=str, default='DBSP', help='Instrument name, e.g. DBSP, LRIS')
     args = parser.parse_args()
@@ -132,28 +158,17 @@ if __name__ == '__main__':
     uploaded = []
 
     for spec in speclist:
-        name = os.path.basename(spec).split('_')[0]
-        hdr = fits.open(spec)[1].header
-        dat = fits.open(spec)[-1].data
-        tbl = Table(dat)
-        tbl = tbl[tbl['wave'] > 3500]
-        hdr = dict(hdr)
-        hdr.pop('COMMENT')
-        tbl.meta['comments'] = [key + ': ' + str(hdr[key]) for key in list(hdr.keys())] + [
-            '# Columns: WAVE FLUX FLUX_ERR']
-        ascii_specname = f'{args.d}/{name}_spec.txt'
-        ascii.write(tbl, ascii_specname, format='no_header', overwrite=True)
-        ascii_speclist.append(ascii_specname)
-
-        ztfname = name
+        ztfname = os.path.basename(spec).split('_')[0]
         print(ztfname)
         if ztfname in uploaded:
             continue
-
-        lines = np.array(tbl.meta['comments'])
-        date = lines[['UTSHUT' in line for line in lines]][0].split(': ')[1]
+        ascii_specname, date = prepare_spectrum_in_ascii_format(spec, instrument_id)
         spec = ascii.read(ascii_specname)
         plt.figure()
         plt.plot(spec['col1'], spec['col2'])
         plt.show()
-        upload_spec(specfile=ascii_specname, ztfname=ztfname, obsdate=date, meta=None, instrument_id=instrument_id, observers=observers, reducers=reducers)
+        upload_spec(specfile=ascii_specname, ztfname=ztfname, obsdate=date, meta=None, instrument_id=instrument_id,
+                    observers=observer_ids, reducers=reducer_ids)
+        uploaded.append(ztfname)
+
+    print(f"Successfully uploaded {uploaded} : {len(uploaded)}/{len(speclist)}")
