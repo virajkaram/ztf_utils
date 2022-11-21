@@ -5,7 +5,6 @@ import json
 
 
 def connect_kowalski():
-    secrets = ascii.read('/Users/viraj/ztf_utils/secrets.csv', format='csv')
     with open('secrets_kowalski.json','r') as f:
         secrets = json.load(f)
 
