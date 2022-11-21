@@ -1,12 +1,16 @@
 from penquins import Kowalski
 from astropy.io import ascii
 import argparse
+import json
 
 
 def connect_kowalski():
     secrets = ascii.read('/Users/viraj/ztf_utils/secrets.csv', format='csv')
-    username_kowalski = secrets['kowalski_user'][0]
-    password_kowalski = secrets['kowalski_pwd'][0]
+    with open('secrets_kowalski.json','r') as f:
+        secrets = json.load(f)
+
+    username_kowalski = secrets['username']
+    password_kowalski = secrets['password']
     # load username & passw credentials
     protocol, host, port = "https", "kowalski.caltech.edu", 443
     kowalski = Kowalski(username=username_kowalski, password=password_kowalski, protocol=protocol, host=host, port=port)
@@ -47,7 +51,7 @@ def cone_search(k, coords, radius=20, catalog_name="ZTF_alerts"):
     return data
 
 
-def cone_search_CLU(k, coords, radius=20):
+def cone_search_CLU(k, coords, radius=20, catalog_filter={}):
     # radius : arcsec
     # coords : {'ZTFname1:[ra1,dec1]'}
     q = {
@@ -60,13 +64,9 @@ def cone_search_CLU(k, coords, radius=20):
             },
             "catalogs": {
                 "CLU_20190625": {
-                    "filter": {},
+                    "filter": catalog_filter,
                     "projection": {
-                        "_id": 0,
-                        "cutoutScience": 0,
-                        "cutoutTemplate": 0,
-                        "cutoutDifference": 0
-
+                        "_id": 0
                     }
                 }
             }
