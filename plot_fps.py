@@ -229,9 +229,11 @@ if __name__ == '__main__':
     parser.add_argument("--ibin",type=int,default=1,help="make only magnitudes as well")
     parser.add_argument("--cbin",type=int,default=1,help="make only magnitudes as well")
     parser.add_argument("--obin",type=int,default=1,help="make only magnitudes as well")
-    parser.add_argument("--xlim",default=None,type=float,help="set xlim to axis")
+    parser.add_argument("--xmin",default=None,type=float,help="set xlim to axis")
+    parser.add_argument("--xmax",default=1,type=float,help="set xlim to axis")
     parser.add_argument("--ymin",default=18,type=float,help="set ylim to axis")
     parser.add_argument("--ymax",default=22,type=float,help="set ylim to axis")
+    parser.add_argument("--no_mask",action="store_true",help="skip applying mask on images")
 
     args = parser.parse_args()
     jd0 = Time(datetime.utcnow()).jd
@@ -253,7 +255,8 @@ if __name__ == '__main__':
         except ValueError:
             ztflc = ztflc[ztflc['forcediffimflux,']!='null']
 
-        ztflc = ztflc[(ztflc['infobitssci,']==0) & (ztflc['scisigpix,']<25) & (ztflc['sciinpseeing,']<4)]
+        if not args.no_mask:
+            ztflc = ztflc[(ztflc['infobitssci,']==0) & (ztflc['scisigpix,']<25) & (ztflc['sciinpseeing,']<4)]
         print('Found %s good points.'%(len(ztflc)))
 
         ztflc.add_column(Column(name = 'forcediffimflux_uJy',data=np.array(ztflc['forcediffimflux,'],dtype=float)*10**(-0.4*(np.array(ztflc['zpmaginpsci,'])+48.6))/1e-29))
@@ -276,8 +279,8 @@ if __name__ == '__main__':
                 plt.legend(fontsize=12)
                 plt.xlabel('JD - %i [today]'%(jd0))
                 plt.ylabel('mag')
-                if args.xlim is not None:
-                    plt.xlim(args.xlim,1)
+                if args.xmin is not None:
+                    plt.xlim(args.xmin,args.xmax)
 
                 if args.atlas_file is not None:
                     print('In Atlas')
@@ -299,8 +302,8 @@ if __name__ == '__main__':
                 plt.legend(fontsize=12)
                 plt.xlabel('JD - %i [today]'%(jd0))
                 plt.ylabel('mag')
-                if args.xlim is not None:
-                    plt.xlim(args.xlim,1)
+                if args.xmin is not None:
+                    plt.xlim(args.xmin,args.xmax)
 
                 if args.atlas_file is not None:
                     print('In Atlas bin')
@@ -377,8 +380,8 @@ if __name__ == '__main__':
             plt = plot_binned_mags_df(o,args.obin,c='orange',l='ATLAS-o',magticks=True,ymn=args.ymin,ymx=args.ymax,jd0=jd0)
             plt.savefig('%s_binned_mags.pdf'%(objname),bbox_inches='tight')
 
-    if args.xlim is not None:
-        plt.xlim(args.xlim,1)
+    if args.xmin is not None:
+        plt.xlim(args.xmin,args.xmax)
 
 
     plt.savefig('%s.pdf'%(objname),bbox_inches='tight')
