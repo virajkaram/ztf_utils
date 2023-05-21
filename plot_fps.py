@@ -262,17 +262,17 @@ if __name__ == '__main__':
     parser.add_argument("--mag", action='store_true', default=False,
                         help="make only magnitudes as well")
     parser.add_argument("--bin", action='store_true', default=False,
-                        help="make only magnitudes as well")
+                        help="Bin photometry")
     parser.add_argument("--rbin", type=int, default=1,
-                        help="make only magnitudes as well")
+                        help="Binsize in days for r-band")
     parser.add_argument("--gbin", type=int, default=1,
-                        help="make only magnitudes as well")
+                        help="Binsize in days for g-band")
     parser.add_argument("--ibin", type=int, default=1,
-                        help="make only magnitudes as well")
+                        help="Binsize in days for i-band")
     parser.add_argument("--cbin", type=int, default=1,
-                        help="make only magnitudes as well")
+                        help="Binsize in days for cyan-band")
     parser.add_argument("--obin", type=int, default=1,
-                        help="make only magnitudes as well")
+                        help="Binsize in days for orange-band")
     parser.add_argument("--xmin", default=None, type=float, help="set xlim to axis")
     parser.add_argument("--xmax", default=1, type=float, help="set xlim to axis")
     parser.add_argument("--ymin", default=18, type=float, help="set ylim to axis")
