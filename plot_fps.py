@@ -2,8 +2,6 @@
 import json
 import matplotlib.pyplot as plt
 import matplotlib
-
-matplotlib.use('Agg')
 from astropy.io import ascii
 import numpy as np
 from astropy.time import Time
@@ -12,6 +10,8 @@ import argparse
 from astropy.table import Column
 import matplotlib
 import pandas as pd
+
+matplotlib.use('Agg')
 
 
 def init():
@@ -188,10 +188,11 @@ def plot_binned(d, binsize, c='red', l='ZTF-r', ymn=-50, ymx=100, magticks=True)
     return plt
 
 
-def plot_binned_mags_df(d, binsize, c='red', l='ZTF-r', ymn=18, ymx=22, magticks=True,
+def plot_binned_mags_df(d, binsize, c='red', l='ZTF-r', ymn=18, ymx=22,
                         jd0=Time(datetime.utcnow()).jd, write=True):
     bdf = pd.DataFrame.from_records(d, columns=d.colnames)
-    dbins = np.arange(int(bdf['jd,'].min()), int(bdf['jd,'].max()), binsize)
+    dbins = np.arange(int(bdf['jd,'].min()), int(bdf['jd,'].max())+binsize, binsize)
+    print(int(bdf['jd,'].min()), int(bdf['jd,'].max()), dbins)
     bdf_binned = bdf.groupby(np.digitize(bdf['jd,'], dbins))
     bdf_bin_flux = bdf_binned.apply(wavg_df)
 
@@ -304,7 +305,7 @@ if __name__ == '__main__':
 
         if args.mask:
             ztflc = ztflc[(ztflc['infobitssci,'] == 0) & (ztflc['scisigpix,'] < 25) & (
-                        ztflc['sciinpseeing,'] < 4)]
+                    ztflc['sciinpseeing,'] < 4)]
         print('Found %s good points.' % (len(ztflc)))
 
         ztflc.add_column(Column(name='forcediffimflux_uJy',
@@ -351,15 +352,15 @@ if __name__ == '__main__':
                 plt.figure(figsize=(10, 7))
                 if len(r) > 0:
                     plt = plot_binned_mags_df(r, args.rbin, c='red', l='ZTF-r',
-                                              magticks=True, ymn=args.ymin,
+                                              ymn=args.ymin,
                                               ymx=args.ymax, jd0=jd0)
                 if len(i) > 0:
                     plt = plot_binned_mags_df(i, args.ibin, c='brown', l='ZTF-i',
-                                              magticks=True, ymn=args.ymin,
+                                              ymn=args.ymin,
                                               ymx=args.ymax, jd0=jd0)
                 if len(g) > 0:
                     plt = plot_binned_mags_df(g, args.gbin, c='green', l='ZTF-g',
-                                              magticks=True, ymn=args.ymin,
+                                              ymn=args.ymin,
                                               ymx=args.ymax, jd0=jd0)
                 # plt.axvline(specjd-jd0,linestyle='--',c='black')
                 objname = args.ztf_file.split('.dat')[0]
