@@ -85,6 +85,7 @@ def upload_spectrum_from_ascii(ztfname, instrument_id, filename, obsdate, fileda
 
 def upload_spec(specfile, ztfname, obsdate, meta, instrument_id, observers, reducers):
     filedata = open(specfile, 'r').read()
+    print(ztfname, get_source_api(ztfname))
     sourcegroups = get_source_api(ztfname)['groups']
     groupids = [sg['id'] for sg in sourcegroups]
     spec = specfile
@@ -96,7 +97,7 @@ def upload_spec(specfile, ztfname, obsdate, meta, instrument_id, observers, redu
         print(r)
 
 
-def prepare_spectrum_in_ascii_format(spec, instrument_id):
+def prepare_spectrum_in_ascii_format(spec, instrument_id, clip=True, minwav=3500):
     ascii_specname = ''
     if instrument_id == 3:
         name = os.path.basename(spec).split('_')[0]
@@ -116,6 +117,10 @@ def prepare_spectrum_in_ascii_format(spec, instrument_id):
     if instrument_id==7:
         lines = open(spec, 'r').readlines()
         date = Time(np.array(lines)[['MJD' in line for line in lines]][0].split()[3][1:-1], format='mjd').isot
+        if clip:
+            tbl = ascii.read(spec)
+            tbl = tbl[tbl['col1']>minwav]
+            ascii.write(tbl, spec, format='no_header', overwrite=True)
         ascii_specname = spec
 
     return ascii_specname, date
@@ -152,13 +157,19 @@ if __name__ == '__main__':
         firstname, lastname = reducer.split(' ')
         reducer_ids.append(get_user_id(firstname, lastname))
     print(f'Reducer ids : {reducer_ids}')
-
-    speclist = glob(f'{args.d}/*.fits')
+    
+    if instrument_id==3:    
+        speclist = glob(f'{args.d}/*.fits')
+    if instrument_id == 7:
+        speclist = glob(f'{args.d}/*.spec')
     ascii_speclist = []
     uploaded = []
 
     for spec in speclist:
-        ztfname = os.path.basename(spec).split('_')[0]
+        if instrument_id==3:
+            ztfname = os.path.basename(spec).split('_')[0]
+        if instrument_id==7:
+            ztfname = os.path.basename(spec).split('_')[1]
         print(ztfname)
         if ztfname in uploaded:
             continue
