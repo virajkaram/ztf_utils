@@ -32,7 +32,7 @@ if __name__ == '__main__':
         ztf_name = row['reqId']
         ztf_name_lc = f"{args.plotdir}/named_lcs/{ztf_name}_fps.dat"
         shutil.copy(lcfile, ztf_name_lc)
-        os.system(f"python plot_fps.py --ztf_file {ztf_name_lc} --no_mask --mag")
-        os.system(f"python plot_fps.py --ztf_file {ztf_name_lc} --no_mask --bin "
+        os.system(f"python plot_fps.py --ztf_file {ztf_name_lc} --mag")
+        os.system(f"python plot_fps.py --ztf_file {ztf_name_lc} --bin "
                   f"--rbin 3 --gbin 3 --ibin 3")
         os.system(f"")
