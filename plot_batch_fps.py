@@ -29,7 +29,7 @@ if __name__ == '__main__':
         # crd = SkyCoord(ra=ra, dec=dec, unit=(u.deg, u.deg))
         # idx, d2d, d3d = crd.match_to_catalog_sky(clu_sources_crds)
         # ztf_name = clu_sources.iloc[idx]['id']
-        ztf_name = row['reqid']
+        ztf_name = row['reqId']
         ztf_name_lc = f"{args.plotdir}/named_lcs/{ztf_name}_fps.dat"
         shutil.copy(lcfile, ztf_name_lc)
         os.system(f"python plot_fps.py --ztf_file {ztf_name_lc} --no_mask --mag")
