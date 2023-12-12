@@ -189,9 +189,9 @@ def plot_binned(d, binsize, c='red', l='ZTF-r', ymn=-50, ymx=100, magticks=True)
 
 
 def plot_binned_mags_df(d, binsize, c='red', l='ZTF-r', ymn=18, ymx=22,
-                        jd0=Time(datetime.utcnow()).jd, write=True):
+                        jd0=Time(datetime.utcnow()).jd, write=False):
     bdf = pd.DataFrame.from_records(d, columns=d.colnames)
-    dbins = np.arange(int(bdf['jd,'].min()), int(bdf['jd,'].max())+binsize, binsize)
+    dbins = np.arange(int(bdf['jd,'].min()), int(bdf['jd,'].max()) + binsize, binsize)
     print(int(bdf['jd,'].min()), int(bdf['jd,'].max()), dbins)
     bdf_binned = bdf.groupby(np.digitize(bdf['jd,'], dbins))
     bdf_bin_flux = bdf_binned.apply(wavg_df)
@@ -222,7 +222,7 @@ def plot_binned_mags_df(d, binsize, c='red', l='ZTF-r', ymn=18, ymx=22,
 
     dlim_mags = -2.5 * np.log10(
         snu * np.array(bdfunc[limmask], dtype=float) * 1e-6 / 3631)
-    plt.plot(bdjd[limmask] - jd0, dlim_mags, 'v', color=c)
+    plt.plot(bdjd[limmask] - jd0, dlim_mags, 'v', color=c, alpha=0.4)
     plt.ylim(ymx, ymn)
 
     # print(bdjd[detmask]-jd0)
@@ -385,10 +385,10 @@ if __name__ == '__main__':
                     c = atlaslc[atlaslc['F'] == 'c']
                     o = atlaslc[atlaslc['F'] == 'o']
                     plt = plot_binned_mags_df(c, args.cbin, c='cyan', l='ATLAS-c',
-                                              magticks=True, ymn=args.ymin,
+                                              ymn=args.ymin,
                                               ymx=args.ymax, jd0=jd0)
                     plt = plot_binned_mags_df(o, args.obin, c='orange', l='ATLAS-o',
-                                              magticks=True, ymn=args.ymin,
+                                              ymn=args.ymin,
                                               ymx=args.ymax, jd0=jd0)
 
                 plt.legend()
@@ -409,6 +409,9 @@ if __name__ == '__main__':
             plt = plot_binned(g, args.gbin, c='green', l='ZTF-g', magticks=False)
             plt = plot_binned(i, args.ibin, c='brown', l='ZTF-i', magticks=True)
             ax1.legend(fontsize=12)
+            if mjd_vline is not None:
+                plt.axvline(mjd_vline + 2400000.5 - jd0,
+                            linestyle='--', c='black', alpha=0.2)
             plt.savefig('%s_binned.pdf' % (objname), bbox_inches='tight')
 
     if args.pgir_file is not None:
@@ -451,12 +454,17 @@ if __name__ == '__main__':
 
         if args.bin:
             fig, ax1 = plt.subplots(figsize=(10, 7))
-            plt = plot_binned_mags_df(c, args.cbin, c='cyan', l='ATLAS-c',
-                                      magticks=True, ymn=args.ymin, ymx=args.ymax,
+            plt = plot_binned_mags_df(c, args.cbin, c='blue', l='ATLAS-c',
+                                      ymn=args.ymin, ymx=args.ymax,
                                       jd0=jd0)
             plt = plot_binned_mags_df(o, args.obin, c='orange', l='ATLAS-o',
-                                      magticks=True, ymn=args.ymin, ymx=args.ymax,
+                                      ymn=args.ymin, ymx=args.ymax,
                                       jd0=jd0)
+            if mjd_vline is not None:
+                plt.axvline(mjd_vline + 2400000.5 - jd0,
+                            linestyle='--', c='black', alpha=0.2)
+            if args.xmin is not None:
+                plt.xlim(args.xmin, args.xmax)
             plt.savefig('%s_binned_mags.pdf' % (objname), bbox_inches='tight')
 
     if args.xmin is not None:
