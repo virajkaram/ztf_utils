@@ -5,14 +5,16 @@ import numpy as np
 import argparse
 
 def query_gemini_website(ra_hms, dec_dms, min_dist_deg=15, name='Science star', min_mag=8, max_mag=11):
-    webpage = requests.get('https://www.gemini.edu/apps/telluric-search/telluric-search.py')
+    webpage = requests.get('https://www.gemini.edu/apps/telluric/telluric-search.py')
     doc = lxml.html.fromstring(webpage.content)
     form = doc.xpath('//form')[0]
+    # Print all the fields in the form
+    print([field for field in form.fields])
 
     form.fields['ra'] = ra_hms
     form.fields['dec'] = dec_dms
     form.fields['sptype'] = 'A0V'
-    form.action = 'https://www.gemini.edu/apps/telluric-search/telluric-search.py'
+    form.action = 'https://www.gemini.edu/apps/telluric/telluric-search.py'
 
     olink = lxml.html.submit_form(form)
     opage = lxml.html.parse(olink).getroot()
